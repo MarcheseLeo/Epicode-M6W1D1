@@ -15,7 +15,7 @@
   "type": "commonjs",
   "main": "main.js",
   "scripts": {
-    "dev": "main.js"
+    "dev": "nodemon main.js"
   },
   "dependencies": {
     "express": "^5.2.1",
