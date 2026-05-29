@@ -72,17 +72,17 @@ const getPostById = async (request, response) => {
     }
 }
 
-const getByCategory = async (request, response) => {
+const getByTitle = async (request, response) => {
     try {
-        const { category } = request.query
-        console.log(category)
-        const posts = await postService.getByCategory(category)
+        const { title } = request.query
+        console.log(title)
+        const posts = await postService.getByTitle(title)
 
-        if (!posts) {
+        if (posts.length===0) {
             response.status(404)
                 .send({
                     statusCode: 404,
-                    message: 'No post found'
+                    message: `No post found with title ${title}`
                 })
         }
 
@@ -183,7 +183,7 @@ const deletePost = async (request, response) => {
 module.exports = {
     getPosts,
     getPostById,
-    getByCategory,
+    getByTitle,
     createPost,
     editPost,
     deletePost

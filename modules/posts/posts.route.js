@@ -3,7 +3,7 @@ const posts = express.Router()
 const postController = require('./posts.controller')
 
 posts.get('/', postController.getPosts)
-posts.get('/search', postController.getByCategory)
+posts.get('/search', postController.getByTitle)
 posts.get('/:id', postController.getPostById)
 
 posts.post('/', postController.createPost)

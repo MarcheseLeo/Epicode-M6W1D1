@@ -21,9 +21,9 @@ const getPostById = async (id) => {
     return await PostSchema.findById(id)
 }
 
-const getByCategory = async (query) =>{
+const getByTitle = async (query) =>{
     return await PostSchema.find({
-        category: {
+        title: {
             $regex: query,
             $options: 'i',
         }
@@ -46,7 +46,7 @@ const deletePost = async (id) => {
 module.exports = {
     getPosts,
     getPostById,
-    getByCategory,
+    getByTitle,
     createPost,
     editPost,
     deletePost
