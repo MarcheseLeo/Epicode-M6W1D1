@@ -47,6 +47,7 @@ const createAuthor = async (request, response) => {
                 author
             })
     } catch (error) {
+        console.log(error.message)
         response.status(500)
             .send({
                 statusCode: 500,
