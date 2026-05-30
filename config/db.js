@@ -1,10 +1,8 @@
 const mongoose = require('mongoose')
-const databaseConnectionString = 'mongodb+srv://LeoMarchese:LeoMarchese2!@epicbooks.aupuspr.mongodb.net/'
-
 
 const initDatabaseConnection = async () =>{
     try{
-        await mongoose.connect(databaseConnectionString)
+        await mongoose.connect(process.env.MONGO_URL)
         console.log('Database connected')
     }catch(error){
         console.error('Database connection error')

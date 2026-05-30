@@ -78,7 +78,7 @@ const getByTitle = async (request, response) => {
         console.log(title)
         const posts = await postService.getByTitle(title)
 
-        if (posts.length===0) {
+        if (posts.length === 0) {
             response.status(404)
                 .send({
                     statusCode: 404,
@@ -88,7 +88,7 @@ const getByTitle = async (request, response) => {
 
         response.status(200)
             .send({
-                statusCode:200,
+                statusCode: 200,
                 posts
             })
     } catch (error) {
@@ -100,6 +100,32 @@ const getByTitle = async (request, response) => {
     }
 }
 
+const getPostByAuthor = async (request, response) => {
+    try {
+        const { id } = request.params
+        const posts = await postService.getPostByAuthor(id)
+
+        if (posts.length === 0) {
+            response.status(404)
+                .send({
+                    statusCode: 404,
+                    message: `No post found with author id ${id}`
+                })
+        }
+
+        response.status(200)
+            .send({
+            statusCode: 200,
+            posts
+        })
+    } catch (error) {
+        response.status(500)
+            .send({
+                statusCode: 500,
+                message: 'Error during posts request'
+            })
+    }
+}
 const createPost = async (request, response) => {
     try {
         const { body } = request
@@ -184,6 +210,7 @@ module.exports = {
     getPosts,
     getPostById,
     getByTitle,
+    getPostByAuthor,
     createPost,
     editPost,
     deletePost
