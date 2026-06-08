@@ -1,28 +1,46 @@
 {
-  "name": "epicode-m6w1d1",
-  "version": "1.0.0",
-  "description": "Backend for Epicode Web App",
-  "homepage": "https://github.com/MarcheseLeo/Epicode-M6W1D1#readme",
-  "bugs": {
-    "url": "https://github.com/MarcheseLeo/Epicode-M6W1D1/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MarcheseLeo/Epicode-M6W1D1.git"
-  },
-  "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "main.js",
-  "scripts": {
-    "dev": "nodemon main.js"
-  },
+  "name": "strive-blog-template",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "mongoose": "^9.6.3"
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.1",
+    "@testing-library/user-event": "^14.5.2",
+    "bootstrap": "^5.3.3",
+    "cors": "^2.8.6",
+    "draft-js": "^0.11.7",
+    "draftjs-to-html": "^0.9.1",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.10.1",
+    "react-dom": "^18.2.0",
+    "react-draft-wysiwyg": "^1.15.0",
+    "react-icons": "^4.3.1",
+    "react-router-dom": "^6.22.3",
+    "react-scripts": "^5.0.1",
+    "web-vitals": "^1.0.1"
   },
-  "devDependencies": {
-    "nodemon": "^3.1.14"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
