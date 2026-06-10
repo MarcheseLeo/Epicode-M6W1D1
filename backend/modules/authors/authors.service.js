@@ -1,5 +1,5 @@
 const AuthorSchema = require('./authors.schema')
-const PostSchema = require ('../posts/posts.schema')
+const PostSchema = require('../posts/posts.schema')
 
 const getAuthors = async () => {
     const authors = await AuthorSchema.find().populate('posts', 'title category')
@@ -22,12 +22,20 @@ const editAuthor = async (id, body) => {
 }
 
 const deleteAuthor = async (id) => {
-    const authorToDelete = await AuthorSchema.findByIdAndDelete(id)
-    
-    if(!authorToDelete)
-        return null
-    
+    const authorPosts = await PostSchema.find({ author: id })
 
+    const allComments = authorPosts.flatMap(post => post.comments)
+    if (allCommentIds.length > 0) {
+        await CommentSchema.deleteMany({ _id: { $in: allCommentIds } })
+    }
+    
+    await PostSchema.deleteMany({ author: id })
+    const authorToDelete = await AuthorSchema.findByIdAndDelete(id)
+
+    if (!authorToDelete)
+        return null
+
+    return authorToDelete
 }
 module.exports = {
     getAuthors,

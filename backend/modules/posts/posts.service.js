@@ -1,5 +1,7 @@
 const PostSchema = require('./posts.schema')
 const AuthorSchema = require('../authors/authors.schema')
+const CommentSchema = require('../comments/comments.schema')
+
 
 const getPosts = async (page, pageSize) => {
     const posts = await PostSchema.find()
@@ -39,26 +41,28 @@ const createPost = async (body) => {
     const post = new PostSchema(body)
     const savedPost = await post.save()
 
-    await AuthorSchema.updateOne({id: body.author}, {$push: {posts: savedPost}})
+    await AuthorSchema.updateOne({ _id: body.author }, { $push: { posts: savedPost } })
     return savedPost
 }
 
 const editPost = async (id, body) => {
-    return post = PostSchema.findByIdAndUpdate(id, body, { new: true })
+    return post = await PostSchema.findByIdAndUpdate(id, body, { new: true })
 }
 
 const deletePost = async (id) => {
-    const postToDelete = await PostSchema.findByIdAndDelete(id)
-    
-    if(!postToDelete)
+    const postToDelete = await PostSchema.findById(id)
+
+    if (!postToDelete)
         return null
+
+    await CommentSchema.deleteMany({ _id: { $in: postToDelete.comments } })
 
     await AuthorSchema.findByIdAndUpdate(
         postToDelete.author,
-        {$pull: {posts: postToDelete.id}}
+        { $pull: { posts: postToDelete.id } }
     )
 
-    return postToDelete
+    return await PostSchema.findByIdAndDelete(id)
 }
 
 module.exports = {

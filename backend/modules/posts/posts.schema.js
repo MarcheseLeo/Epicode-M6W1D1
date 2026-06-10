@@ -35,8 +35,14 @@ const PostSchema = new mongoose.Schema({
     content: {
         type: String,
         required: true
-    }
-
+    },
+    comments:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'comment',
+            default: []
+        }
+    ]
 }, { timestamps: true, strict: true })
 
 module.exports = mongoose.model('post', PostSchema, 'posts')
