@@ -1,5 +1,5 @@
-const postsSchema = require('./posts.schema')
 const PostSchema = require('./posts.schema')
+const AuthorSchema = require('../authors/authors.schema')
 
 const getPosts = async (page, pageSize) => {
     const posts = await PostSchema.find()
@@ -7,7 +7,7 @@ const getPosts = async (page, pageSize) => {
         .limit(pageSize)
         .skip((page - 1) * pageSize)
 
-    const totalPosts = await postsSchema.countDocuments()
+    const totalPosts = await PostSchema.countDocuments()
     const totalPages = Math.ceil(totalPosts / pageSize)
     return {
         page: Number(page),
@@ -30,13 +30,17 @@ const getByTitle = async (query) => {
         }
     })
 }
+
 const getPostByAuthor = async (authorId) => {
     return await PostSchema.find({ author: authorId }).populate('author')
 }
 
 const createPost = async (body) => {
     const post = new PostSchema(body)
-    return await post.save()
+    const savedPost = await post.save()
+
+    await AuthorSchema.updateOne({id: body.author}, {$push: {posts: savedPost}})
+    return savedPost
 }
 
 const editPost = async (id, body) => {
@@ -44,8 +48,17 @@ const editPost = async (id, body) => {
 }
 
 const deletePost = async (id) => {
-    const post = await PostSchema.findByIdAndDelete(id)
-    return post
+    const postToDelete = await PostSchema.findByIdAndDelete(id)
+    
+    if(!postToDelete)
+        return null
+
+    await AuthorSchema.findByIdAndUpdate(
+        postToDelete.author,
+        {$pull: {posts: postToDelete.id}}
+    )
+
+    return postToDelete
 }
 
 module.exports = {

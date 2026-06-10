@@ -1,8 +1,8 @@
-const authorsSchema = require('./authors.schema')
 const AuthorSchema = require('./authors.schema')
+const PostSchema = require ('../posts/posts.schema')
 
 const getAuthors = async () => {
-    const authors = await AuthorSchema.find()
+    const authors = await AuthorSchema.find().populate('posts', 'title category')
     return authors
 }
 
@@ -22,8 +22,12 @@ const editAuthor = async (id, body) => {
 }
 
 const deleteAuthor = async (id) => {
-    const deletedAuthor = await AuthorSchema.findByIdAndDelete(id);
-    return deletedAuthor;
+    const authorToDelete = await AuthorSchema.findByIdAndDelete(id)
+    
+    if(!authorToDelete)
+        return null
+    
+
 }
 module.exports = {
     getAuthors,
