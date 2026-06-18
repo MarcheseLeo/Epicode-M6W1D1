@@ -8,7 +8,7 @@ Progetto full-stack per la creazione e gestione di un blog. Il progetto include 
 * **Backend (Live su Render):** [https://epicode-m6w1d1.onrender.com](https://epicode-m6w1d1.onrender.com)
 
 ## 🛠️ Tecnologie Utilizzate
-* **Frontend:** React, React-Bootstrap, Draft.js
+* **Frontend:** React, React-Bootstrap
 * **Backend:** Node.js, Express, MongoDB, Mongoose
 * **Autenticazione:** JWT, Passport.js (Google Strategy)
 * **Storage e Email:** Cloudinary, SendGrid / Nodemailer
