@@ -36,9 +36,9 @@ const Home = () => {
     };
 
     fetchAllPosts();
-    console.log(posts)
-  }, []);
 
+  }, []);
+    console.log(posts)
   return (
     <Container fluid="sm" className="pt-5 mt-5">
       <h1 className="blog-main-title mb-5 text-center">Benvenuto sullo Strive Blog!</h1>

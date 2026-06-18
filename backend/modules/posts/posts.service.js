@@ -22,7 +22,7 @@ const getPosts = async (page, pageSize) => {
 }
 
 const getPostById = async (id) => {
-    return await PostSchema.findById(id).populate('author',  'firstName lastName email dob')
+    return await PostSchema.findById(id).populate('author',  'firstName lastName email dob avatar')
 }
 
 const getByTitle = async (query) => {
@@ -35,7 +35,7 @@ const getByTitle = async (query) => {
 }
 
 const getPostByAuthor = async (authorId) => {
-    return await PostSchema.find({ author: authorId }).populate('author')
+    return await PostSchema.find({ author: authorId }).populate('author', 'firstName lastName email dob avatar')
 }
 
 const createPost = async (body) => {
