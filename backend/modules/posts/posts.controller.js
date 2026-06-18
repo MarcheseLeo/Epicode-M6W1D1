@@ -17,12 +17,12 @@ const getPosts = async (request, response, next) => {
 
         const hasPrevPage = page > 1;
         const prevPage = hasPrevPage
-            ? `http://localhost:9099/posts?page=${page - 1}&pageSize=${pageSize}`
+            ? `${process.env.BACKEND_BASE_URL}/posts?page=${page - 1}&pageSize=${pageSize}`
             : null;
 
         const hasNextPage = page < totalPages;
         const nextPage = hasNextPage
-            ? `http://localhost:9099/posts/?page=${Number(page) + 1}&pageSize=${pageSize}`
+            ? `${process.env.BACKEND_BASE_URL}/posts/?page=${Number(page) + 1}&pageSize=${pageSize}`
             : null;
 
         response.status(200)

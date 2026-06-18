@@ -107,7 +107,7 @@ const Login = () => {
             </div>
 
             <a
-                href="http://localhost:9099/auth/google"
+                href={process.env.REACT_APP_SERVER_BASE_URL + '/auth/google'}
                 className="btn btn-outline-dark btn-lg w-100 d-flex justify-content-center align-items-center"
             >
                 <img

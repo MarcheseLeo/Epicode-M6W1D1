@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken')
 const authGoogle = async(req, res, next) =>{
     try{
         const user = encodeURIComponent(JSON.stringify(req.user))
-        const redirectUrl = `http://localhost:3000/oauth/success?user=${user}`
+        const redirectUrl = `${process.env.REDIRECT_URL}/success?user=${user}`
 
         res.redirect(redirectUrl)
     }catch(e){
@@ -24,7 +24,7 @@ const manageOauthCallback = async (req, res, next) =>{
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' })
 
-        const redirectUrl = `http://localhost:3000/oauth/success/?token=${token}`
+        const redirectUrl = `${process.env.REDIRECT_URL}/?token=${token}`
         res.redirect(redirectUrl)
     }catch(e){
 
