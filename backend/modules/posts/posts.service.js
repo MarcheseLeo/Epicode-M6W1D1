@@ -1,11 +1,12 @@
 const PostSchema = require('./posts.schema')
 const AuthorSchema = require('../authors/authors.schema')
 const CommentSchema = require('../comments/comments.schema')
-
+const bcrypt = require('bcrypt')
 
 const getPosts = async (page, pageSize) => {
     const posts = await PostSchema.find()
-        .populate('author')
+        .populate('author', 'firstName lastName email dob')
+        .populate('comments', 'rate comment')
         .limit(pageSize)
         .skip((page - 1) * pageSize)
 
@@ -21,7 +22,7 @@ const getPosts = async (page, pageSize) => {
 }
 
 const getPostById = async (id) => {
-    return await PostSchema.findById(id).populate('author')
+    return await PostSchema.findById(id).populate('author',  'firstName lastName email dob')
 }
 
 const getByTitle = async (query) => {

@@ -1,8 +1,9 @@
 const AuthorSchema = require('./authors.schema')
 const PostSchema = require('../posts/posts.schema')
 
-const getAuthors = async () => {
-    const authors = await AuthorSchema.find().populate('posts', 'title category')
+
+const getAuthors = async (name='') => {
+    const authors = await AuthorSchema.find({firstName:new RegExp(name, 'i')}).populate('posts', 'title category')
     return authors
 }
 

@@ -1,0 +1,17 @@
+.profile-container {
+    max-width: 500px;
+}
+
+.avatar-preview-container {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto;
+}
+
+.avatar-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    object-position: center;
+    border: 3px solid #dee2e6;
+}

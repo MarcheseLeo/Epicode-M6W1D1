@@ -1,6 +1,6 @@
 const commentService = require('./comments.service')
 
-const getComments = async (req, res) => {
+const getComments = async (req, res, next) => {
     try {
         const { id } = req.params
         const comments = await commentService.getComments(id)
@@ -18,15 +18,11 @@ const getComments = async (req, res) => {
                 comments
             })
     } catch (e) {
-        res.status(500)
-            .send({
-                statusCode: 500,
-                message: e.message
-            })
+        next(e)
     }
 }
 
-const getCommentById = async (req, res) => {
+const getCommentById = async (req, res, next) => {
     try {
         const { id } = req.params
         const comment = await commentService.getCommentById(id)
@@ -44,15 +40,11 @@ const getCommentById = async (req, res) => {
                 comment
             })
     } catch (e) {
-        res.status(500)
-            .send({
-                statusCode: 500,
-                message: e.message
-            })
+        next(e)
     }
 }
 
-const createComment = async (req, res) => {
+const createComment = async (req, res, next) => {
     try {
         const { body } = req
         const { id } = req.params
@@ -71,15 +63,11 @@ const createComment = async (req, res) => {
                 message: 'Comment created succesfully'
             })
     } catch (e) {
-        res.status(500)
-            .send({
-                statusCode: 500,
-                message: e.message
-            })
+        next(e)
     }
 }
 
-const editComment = async (req, res) => {
+const editComment = async (req, res, next) => {
     try {
         const { body } = req
         const { commentId } = req.params
@@ -98,15 +86,11 @@ const editComment = async (req, res) => {
                 comment
             })
     } catch (e) {
-        res.status(500)
-            .send({
-                statusCode: 500,
-                message: e.message
-            })
+        next(e)
     }
 }
 
-const deleteComment = async (req, res) => {
+const deleteComment = async (req, res, next) => {
     try {
         const { id, commentId } = req.params
 
@@ -125,11 +109,7 @@ const deleteComment = async (req, res) => {
                 message: 'Comment deleted succesfully'
             })
     } catch (e) {
-        res.status(500)
-            .send({
-                statusCode: 500,
-                message: e.message
-            })
+        next(e)
     }
 }
 

@@ -1,18 +1,20 @@
 const { response } = require('express')
 const postService = require('./posts.service')
+const PostNotFoundException = require('../../exceptions/posts/PostNotFoundException')
 
-const getPosts = async (request, response) => {
+const {sendEmail,sgtSend} = require('../email/index');
+
+const cloudinary = require('cloudinary').v2
+
+const getPosts = async (request, response, next) => {
     const { page = 1, pageSize = 3 } = request.query
     try {
         const { posts, totalPosts, totalPages } = await postService.getPosts(page, pageSize)
 
         if (posts.length === 0) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: 'No post found'
-                })
+            throw new PostNotFoundException()
         }
+
         const hasPrevPage = page > 1;
         const prevPage = hasPrevPage
             ? `http://localhost:9099/posts?page=${page - 1}&pageSize=${pageSize}`
@@ -36,26 +38,16 @@ const getPosts = async (request, response) => {
 
             })
     } catch (error) {
-        console.log(error.message)
-        response.status(500)
-            .send({
-                statusCode: 500,
-                message: 'Error during posts request'
-            })
+        next(error)
     }
 }
 
-const getPostById = async (request, response) => {
+const getPostById = async (request, response, next) => {
     try {
         const { id } = request.params
         const post = await postService.getPostById(id)
-
         if (!post) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: 'No post found'
-                })
+            throw new PostNotFoundException()
         }
 
         response.status(200)
@@ -64,26 +56,18 @@ const getPostById = async (request, response) => {
                 post
             })
     } catch (error) {
-        response.status(500)
-            .send({
-                statusCode: 500,
-                message: 'Error during posts request'
-            })
+        next(error)
     }
 }
 
-const getByTitle = async (request, response) => {
+const getByTitle = async (request, response, next) => {
     try {
         const { title } = request.query
-        console.log(title)
+
         const posts = await postService.getByTitle(title)
 
         if (posts.length === 0) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: `No post found with title ${title}`
-                })
+            throw new PostNotFoundException()
         }
 
         response.status(200)
@@ -92,52 +76,17 @@ const getByTitle = async (request, response) => {
                 posts
             })
     } catch (error) {
-        response.status(500)
-            .send({
-                statusCode: 500,
-                message: 'Error during posts request'
-            })
+        next(error)
     }
 }
 
-const getPostByAuthor = async (request, response) => {
+const getPostByAuthor = async (request, response, next) => {
     try {
         const { id } = request.params
         const posts = await postService.getPostByAuthor(id)
 
         if (posts.length === 0) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: `No post found with author id ${id}`
-                })
-        }
-
-        response.status(200)
-            .send({
-            statusCode: 200,
-            posts
-        })
-    } catch (error) {
-        response.status(500)
-            .send({
-                statusCode: 500,
-                message: 'Error during posts request'
-            })
-    }
-}
-const createPost = async (request, response) => {
-    try {
-        const { body } = request
-        const { id } = request.params
-        const posts = await postService.createPost(body)
-
-        if (!posts.length === 0) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: 'No post found'
-                })
+            throw new PostNotFoundException()
         }
 
         response.status(200)
@@ -146,25 +95,53 @@ const createPost = async (request, response) => {
                 posts
             })
     } catch (error) {
-        response.status(500)
+        next(error)
+    }
+}
+const createPost = async (request, response, next) => {
+    try {
+        const { body, user } = request
+        const { id } = request.params
+
+        const post = await postService.createPost(body)
+
+        const htmlTemplate = `
+            <div style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2 style="color: #333;">Ottimo lavoro, ${user.firstName}! 🎉</h2>
+                <p>Il tuo nuovo articolo intitolato "<strong>${post.title}</strong>" è stato pubblicato con successo sul nostro blog.</p>
+                <p>Continua così!</p>
+            </div>
+        `;
+
+        sgtSend(
+            user.email,
+            'Nuovo articolo pubblicato!',
+            htmlTemplate
+        ).catch(err => console.error("Errore invio email post:", err));
+
+        // sendEmail(
+        //     user.email,
+        //     'Nuovo articolo pubblicato!',
+        //     htmlTemplate
+        // ).catch(err => console.error("Errore invio email post:", err));
+
+        response.status(200)
             .send({
-                statusCode: 500,
-                message: 'Error during posts request'
+                statusCode: 200,
+                post
             })
+    } catch (error) {
+        next(error)
     }
 }
 
-const editPost = async (request, response) => {
+const editPost = async (request, response, next) => {
     try {
         const { id } = request.params
         const { body } = request
         const post = await postService.editPost(id, body)
         if (!post) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: 'No post found'
-                })
+            throw new PostNotFoundException()
         }
 
         response.status(200)
@@ -173,25 +150,17 @@ const editPost = async (request, response) => {
                 post
             })
     } catch (error) {
-        response.status(500)
-            .send({
-                statusCode: 500,
-                message: 'Error during posts request'
-            })
+        next(erro)
     }
 }
 
-const deletePost = async (request, response) => {
+const deletePost = async (request, response, next) => {
     try {
         const { id } = request.params
         const post = await postService.deletePost(id)
 
         if (!post) {
-            response.status(404)
-                .send({
-                    statusCode: 404,
-                    message: 'No post found'
-                })
+            throw new PostNotFoundException()
         }
         response.status(200)
             .send({
@@ -199,11 +168,51 @@ const deletePost = async (request, response) => {
                 post
             })
     } catch (error) {
-        response.status(500)
-            .send({
-                statusCode: 500,
-                message: 'Error during posts request'
-            })
+        next(error)
+    }
+}
+
+const uploadPostCover = async (request, response, next) => {
+    try {
+        const { id } = request.params;
+
+        if (!request.file) {
+            return response.status(400).send({ message: "Nessun file caricato." });
+        }
+
+        const currentPost = await postService.getPostById(id);
+        if (!currentPost) {
+            throw new PostNotFoundException();
+        }
+
+        if (currentPost.cover && currentPost.cover.includes("cloudinary.com")) {
+            try {
+                const urlParts = currentPost.cover.split('/');
+                const uploadIndex = urlParts.indexOf('upload');
+
+                if (uploadIndex !== -1) {
+                    let publicIdParts = urlParts.slice(uploadIndex + 1);
+                    if (publicIdParts[0].startsWith('v')) {
+                        publicIdParts = publicIdParts.slice(1);
+                    }
+                    const publicId = publicIdParts.join('/').split('.')[0];
+                    await cloudinary.uploader.destroy(publicId);
+                }
+            } catch (err) {
+                console.error("Errore cancellazione vecchia cover:", err);
+            }
+        }
+
+        const coverUrl = request.file.path;
+        const updatedPost = await postService.editPost(id, { cover: coverUrl });
+
+        response.status(200).send({
+            message: "Cover aggiornata con successo!",
+            post: updatedPost
+        });
+
+    } catch (error) {
+        next(error);
     }
 }
 module.exports = {
@@ -213,5 +222,6 @@ module.exports = {
     getPostByAuthor,
     createPost,
     editPost,
-    deletePost
+    deletePost,
+    uploadPostCover
 }

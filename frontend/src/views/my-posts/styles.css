@@ -1,0 +1,24 @@
+.my-posts-container {
+
+    padding-top: 110px !important;
+    min-height: 80vh;
+}
+
+.my-posts-container .blog-main-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 50px;
+    color: #00d66f;
+}
+
+
+.my-posts-container .alert-info {
+    background-color: #f8f9fa;
+    border-left: 5px solid #00d66f;
+    color: #333;
+    font-size: 1.2rem;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
