@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt')
 
 const getPosts = async (page, pageSize) => {
     const posts = await PostSchema.find()
-        .populate('author', 'firstName lastName email dob avatar')
+        .populate('author', 'firstName lastName email dob avatar ')
         .populate('comments', 'rate comment')
         .limit(pageSize)
         .skip((page - 1) * pageSize)
