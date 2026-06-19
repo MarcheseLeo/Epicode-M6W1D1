@@ -18,9 +18,7 @@ const authRoute = require('./modules/auth/auth.route')
 const googleOauthRoute = require('./modules/oauth/oauth.route')
 
 const server = express()
-server.use(cors({
-    origin: process.env.FRONTEND_URL
-}))
+server.use(cors())
 server.use(express.json())
 server.use('/upload', express.static(path.join(__dirname, './upload')))
 
