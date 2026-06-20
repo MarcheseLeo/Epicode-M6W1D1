@@ -101,9 +101,11 @@ const getPostByAuthor = async (request, response, next) => {
 const createPost = async (request, response, next) => {
     try {
         const { body, user } = request
-        const { id } = request.params
 
-        const post = await postService.createPost(body)
+        const post = await postService.createPost({
+            ...body,
+            author: user.id
+        })
 
         const htmlTemplate = `
             <div style="font-family: Arial, sans-serif; padding: 20px;">
@@ -138,11 +140,21 @@ const createPost = async (request, response, next) => {
 const editPost = async (request, response, next) => {
     try {
         const { id } = request.params
-        const { body } = request
-        const post = await postService.editPost(id, body)
-        if (!post) {
+        const { body, user } = request
+        const currentPost = await postService.getPostById(id)
+
+        if (!currentPost) {
             throw new PostNotFoundException()
         }
+
+        if (String(currentPost.author._id) !== user.id) {
+            return response.status(403).send({
+                statusCode: 403,
+                message: 'You can edit only your posts'
+            })
+        }
+
+        const post = await postService.editPost(id, body)
 
         response.status(200)
             .send({
@@ -150,18 +162,29 @@ const editPost = async (request, response, next) => {
                 post
             })
     } catch (error) {
-        next(erro)
+        next(error)
     }
 }
 
 const deletePost = async (request, response, next) => {
     try {
         const { id } = request.params
-        const post = await postService.deletePost(id)
+        const { user } = request
+        const currentPost = await postService.getPostById(id)
 
-        if (!post) {
+        if (!currentPost) {
             throw new PostNotFoundException()
         }
+
+        if (String(currentPost.author._id) !== user.id) {
+            return response.status(403).send({
+                statusCode: 403,
+                message: 'You can delete only your posts'
+            })
+        }
+
+        const post = await postService.deletePost(id)
+
         response.status(200)
             .send({
                 statusCode: 200,
@@ -183,6 +206,13 @@ const uploadPostCover = async (request, response, next) => {
         const currentPost = await postService.getPostById(id);
         if (!currentPost) {
             throw new PostNotFoundException();
+        }
+
+        if (String(currentPost.author._id) !== request.user.id) {
+            return response.status(403).send({
+                statusCode: 403,
+                message: 'You can update only your post cover'
+            })
         }
 
         if (currentPost.cover && currentPost.cover.includes("cloudinary.com")) {

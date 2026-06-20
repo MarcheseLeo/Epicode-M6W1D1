@@ -1,11 +1,8 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useCallback, useEffect, useState, useContext } from "react";
 import { Container, Image, Button, Form, Alert, Spinner, Card } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
-import { Editor } from 'react-draft-wysiwyg';
 import { AuthContext } from "../../context/AuthContext";
 import BlogAuthor from "../../components/blog/blog-author/BlogAuthor";
-import BlogLike from "../../components/likes/BlogLike";
-import draftToHtml from "draftjs-to-html";
 import "./styles.css";
 
 const Blog = () => {
@@ -23,12 +20,15 @@ const Blog = () => {
   const [comments, setComments] = useState([]);
   const [newCommentText, setNewCommentText] = useState("");
   const [newCommentRate, setNewCommentRate] = useState(5);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [editCommentRate, setEditCommentRate] = useState(5);
 
   const params = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
-  const fetchPostDetails = async () => {
+  const fetchPostDetails = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/posts/${params.id}`, {
@@ -50,10 +50,10 @@ const Blog = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
 
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/posts/${params.id}/comments`, {
@@ -67,12 +67,12 @@ const Blog = () => {
     } catch (error) {
       console.error("Errore nel caricamento dei commenti:", error);
     }
-  };
+  }, [params.id]);
 
   useEffect(() => {
     fetchPostDetails();
     fetchComments();
-  }, [params.id]);
+  }, [fetchPostDetails, fetchComments]);
 
 
   const handleDeletePost = async () => {
@@ -129,6 +129,72 @@ const Blog = () => {
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const startEditComment = (comment) => {
+    setEditingCommentId(comment._id);
+    setEditCommentText(comment.comment);
+    setEditCommentRate(comment.rate || 1);
+  };
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditCommentText("");
+    setEditCommentRate(5);
+  };
+
+  const handleEditComment = async (e, commentId) => {
+    e.preventDefault();
+    if (!editCommentText.trim()) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/posts/${blog._id}/comment/${commentId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          comment: editCommentText,
+          rate: editCommentRate
+        })
+      });
+
+      if (response.ok) {
+        cancelEditComment();
+        fetchComments();
+        setStatus({ type: "success", message: "Commento modificato con successo!" });
+      } else {
+        setStatus({ type: "danger", message: "Errore nella modifica del commento." });
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: "danger", message: "Errore di connessione." });
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    const confirmDelete = window.confirm("Vuoi eliminare questo commento?");
+    if (!confirmDelete) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${process.env.REACT_APP_SERVER_BASE_URL}/posts/${blog._id}/comment/${commentId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        fetchComments();
+        setStatus({ type: "success", message: "Commento eliminato con successo!" });
+      } else {
+        setStatus({ type: "danger", message: "Errore nell'eliminazione del commento." });
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus({ type: "danger", message: "Errore di connessione." });
     }
   };
 
@@ -302,18 +368,63 @@ const Blog = () => {
               {comments.length === 0 ? (
                 <p className="text-muted text-center">Nessun commento ancora. Rompi il ghiaccio!</p>
               ) : (
-                comments.map((c, index) => (
-                  <Card key={index} className="mb-3 border-0 shadow-sm">
-                    <Card.Body>
+                comments.map((c, index) => {
+                  const isCommentAuthor = user && c.author && user._id === c.author._id;
+                  const authorName = c.author
+                    ? `${c.author.firstName} ${c.author.lastName}`
+                    : "Utente";
 
-                      <Card.Title className="fs-6 d-flex justify-content-between">
-                         Utente 
-                         <span className="text-warning">★ {c.rate}/5</span>
-                      </Card.Title>
-                      <Card.Text>{c.comment}</Card.Text>
-                    </Card.Body>
-                  </Card>
-                ))
+                  return (
+                    <Card key={c._id || index} className="mb-3 border-0 shadow-sm">
+                      <Card.Body>
+                        {editingCommentId === c._id ? (
+                          <Form onSubmit={(e) => handleEditComment(e, c._id)}>
+                            <Form.Group className="mb-3">
+                              <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={editCommentText}
+                                onChange={(e) => setEditCommentText(e.target.value)}
+                                required
+                              />
+                            </Form.Group>
+                            <Form.Group className="mb-3 d-flex align-items-center" style={{gap: '15px'}}>
+                              <Form.Label className="fw-bold mb-0">Voto:</Form.Label>
+                              <Form.Control
+                                as="select"
+                                value={editCommentRate}
+                                onChange={(e) => setEditCommentRate(e.target.value)}
+                                style={{ width: '80px' }}
+                              >
+                                {[1, 2, 3, 4, 5].map(num => <option key={num} value={num}>{num}</option>)}
+                              </Form.Control>
+                              <Button type="submit" variant="dark" className="ms-auto">Salva</Button>
+                              <Button variant="outline-secondary" onClick={cancelEditComment}>Annulla</Button>
+                            </Form.Group>
+                          </Form>
+                        ) : (
+                          <>
+                            <Card.Title className="fs-6 d-flex justify-content-between">
+                              {authorName}
+                              <span className="text-warning">★ {c.rate}/5</span>
+                            </Card.Title>
+                            <Card.Text>{c.comment}</Card.Text>
+                            {isCommentAuthor && (
+                              <div className="d-flex justify-content-end gap-2">
+                                <Button variant="outline-dark" size="sm" onClick={() => startEditComment(c)}>
+                                  Modifica
+                                </Button>
+                                <Button variant="outline-danger" size="sm" onClick={() => handleDeleteComment(c._id)}>
+                                  Elimina
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  );
+                })
               )}
             </div>
 

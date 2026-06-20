@@ -20,7 +20,7 @@ const postBodyValidation = [
 ]
 
 const postBodyValidator = (req, res, next) =>{
-    const errors = validationResult(res)
+    const errors = validationResult(req)
 
     if(!errors.isEmpty()){
         return res.status(400)

@@ -7,18 +7,20 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
 
   const [searchQuery, setSearchQuery] = useState("");
 
 
-  const fetchPosts = async (query = "") => {
+  const fetchPosts = async (query = "", page = 1) => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem("token");
 
-      let url = `${process.env.REACT_APP_SERVER_BASE_URL}/posts`;
+      let url = `${process.env.REACT_APP_SERVER_BASE_URL}/posts?page=${page}`;
 
 
       if (query.trim() !== "") {
@@ -35,10 +37,14 @@ const Home = () => {
 
       if (response.ok) {
         setPosts(data.posts || []);
+        setCurrentPage(Number(data.page) || page);
+        setTotalPages(Number(data.totalPages) || 1);
       } else {
 
         if (response.status === 404) {
           setPosts([]);
+          setCurrentPage(1);
+          setTotalPages(1);
         } else {
           setError(data.message || "Errore durante il caricamento dei post.");
         }
@@ -59,13 +65,17 @@ const Home = () => {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchPosts(searchQuery);
+    fetchPosts(searchQuery, 1);
   };
 
 
   const handleResetSearch = () => {
     setSearchQuery("");
-    fetchPosts("");
+    fetchPosts("", 1);
+  };
+
+  const handlePageChange = (page) => {
+    fetchPosts(searchQuery, page);
   };
 
   return (
@@ -118,6 +128,26 @@ const Home = () => {
           </Col>
         ))}
       </Row>
+
+      {!loading && !error && !searchQuery && totalPages > 1 && (
+        <div className="d-flex justify-content-center align-items-center gap-3 mb-5">
+          <Button
+            variant="outline-dark"
+            disabled={currentPage <= 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            Precedente
+          </Button>
+          <span>Pagina {currentPage} di {totalPages}</span>
+          <Button
+            variant="outline-dark"
+            disabled={currentPage >= totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            Successiva
+          </Button>
+        </div>
+      )}
     </Container>
   );
 };

@@ -24,10 +24,10 @@ const manageOauthCallback = async (req, res, next) =>{
 
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' })
 
-        const redirectUrl = `${process.env.REDIRECT_URL}/?token=${token}`
+        const redirectUrl = `${process.env.REDIRECT_URL}?token=${token}`
         res.redirect(redirectUrl)
     }catch(e){
-
+        next(e)
     }
 }
 

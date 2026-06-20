@@ -12,6 +12,7 @@ import ProtectedRoute from "./components/protectedRoute/ProtectedRoute";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Profile from "./views/profile/Profile";
 import { OauthSuccessPage } from "./views/oauth/success/OauthSuccessPage";
+import Settings from "./views/settings/Settings";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/new" element={<NewBlogPost />} />
           <Route path="/profile" element={<Profile />} /> 
           <Route path="/my-posts" element={<MyPosts />} />
+          <Route path="/settings" element={<Settings />} />
           
         </Route>
       </Routes>

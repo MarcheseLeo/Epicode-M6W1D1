@@ -24,10 +24,10 @@ const getComments = async (req, res, next) => {
 
 const getCommentById = async (req, res, next) => {
     try {
-        const { id } = req.params
-        const comment = await commentService.getCommentById(id)
+        const { commentId } = req.params
+        const comment = await commentService.getCommentById(commentId)
 
-        if (comment.length === 0) {
+        if (!comment) {
             return res.status(404)
                 .send({
                     statusCode: 404,
@@ -46,10 +46,13 @@ const getCommentById = async (req, res, next) => {
 
 const createComment = async (req, res, next) => {
     try {
-        const { body } = req
+        const { body, user } = req
         const { id } = req.params
 
-        const comment = await commentService.createComment(body, id)
+        const comment = await commentService.createComment({
+            ...body,
+            author: user.id
+        }, id)
         if (!comment) {
             return res.status(404)
                 .send({
@@ -60,7 +63,8 @@ const createComment = async (req, res, next) => {
         res.status(200)
             .send({
                 statusCode: 200,
-                message: 'Comment created succesfully'
+                message: 'Comment created succesfully',
+                comment
             })
     } catch (e) {
         next(e)
@@ -69,17 +73,28 @@ const createComment = async (req, res, next) => {
 
 const editComment = async (req, res, next) => {
     try {
-        const { body } = req
+        const { body, user } = req
         const { commentId } = req.params
-        const comment = await commentService.editComment(commentId, body)
+        const currentComment = await commentService.getCommentById(commentId)
 
-        if (!comment) {
+        if (!currentComment) {
             return res.status(404)
                 .send({
                     statusCode: 404,
                     message: 'No comment found'
                 })
         }
+
+        if (!currentComment.author || String(currentComment.author._id) !== user.id) {
+            return res.status(403)
+                .send({
+                    statusCode: 403,
+                    message: 'You can edit only your comments'
+                })
+        }
+
+        const comment = await commentService.editComment(commentId, body)
+
         res.status(200)
             .send({
                 statusCode: 200,
@@ -93,16 +108,27 @@ const editComment = async (req, res, next) => {
 const deleteComment = async (req, res, next) => {
     try {
         const { id, commentId } = req.params
+        const { user } = req
+        const currentComment = await commentService.getCommentById(commentId)
 
-        const comment = await commentService.deleteComment(commentId, id)
-
-        if (!comment) {
+        if (!currentComment) {
             return res.status(404)
                 .send({
                     statusCode: 404,
                     message: 'No comment found'
                 })
         }
+
+        if (!currentComment.author || String(currentComment.author._id) !== user.id) {
+            return res.status(403)
+                .send({
+                    statusCode: 403,
+                    message: 'You can delete only your comments'
+                })
+        }
+
+        const comment = await commentService.deleteComment(commentId, id)
+
         res.status(200)
             .send({
                 statusCode: 200,

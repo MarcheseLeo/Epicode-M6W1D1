@@ -1,12 +1,18 @@
 const PostSchema = require('./posts.schema')
 const AuthorSchema = require('../authors/authors.schema')
 const CommentSchema = require('../comments/comments.schema')
-const bcrypt = require('bcrypt')
 
 const getPosts = async (page, pageSize) => {
     const posts = await PostSchema.find()
         .populate('author', 'firstName lastName email dob avatar ')
-        .populate('comments', 'rate comment')
+        .populate({
+            path: 'comments',
+            select: 'rate comment author createdAt updatedAt',
+            populate: {
+                path: 'author',
+                select: 'firstName lastName email avatar'
+            }
+        })
         .limit(pageSize)
         .skip((page - 1) * pageSize)
 
@@ -22,7 +28,16 @@ const getPosts = async (page, pageSize) => {
 }
 
 const getPostById = async (id) => {
-    return await PostSchema.findById(id).populate('author',  'firstName lastName email dob avatar')
+    return await PostSchema.findById(id)
+        .populate('author', 'firstName lastName email dob avatar')
+        .populate({
+            path: 'comments',
+            select: 'rate comment author createdAt updatedAt',
+            populate: {
+                path: 'author',
+                select: 'firstName lastName email avatar'
+            }
+        })
 }
 
 const getByTitle = async (query) => {
@@ -31,7 +46,7 @@ const getByTitle = async (query) => {
             $regex: query,
             $options: 'i',
         }
-    })
+    }).populate('author', 'firstName lastName email dob avatar')
 }
 
 const getPostByAuthor = async (authorId) => {
@@ -47,7 +62,7 @@ const createPost = async (body) => {
 }
 
 const editPost = async (id, body) => {
-    return post = await PostSchema.findByIdAndUpdate(id, body, { new: true })
+    return await PostSchema.findByIdAndUpdate(id, body, { new: true })
 }
 
 const deletePost = async (id) => {

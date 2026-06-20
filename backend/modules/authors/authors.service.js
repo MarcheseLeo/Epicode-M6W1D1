@@ -1,5 +1,6 @@
 const AuthorSchema = require('./authors.schema')
 const PostSchema = require('../posts/posts.schema')
+const CommentSchema = require('../comments/comments.schema')
 
 
 const getAuthors = async (name='') => {
@@ -25,7 +26,7 @@ const editAuthor = async (id, body) => {
 const deleteAuthor = async (id) => {
     const authorPosts = await PostSchema.find({ author: id })
 
-    const allComments = authorPosts.flatMap(post => post.comments)
+    const allCommentIds = authorPosts.flatMap(post => post.comments)
     if (allCommentIds.length > 0) {
         await CommentSchema.deleteMany({ _id: { $in: allCommentIds } })
     }

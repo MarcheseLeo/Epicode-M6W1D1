@@ -1,15 +1,12 @@
 import React, { useState } from "react";
 import { Container, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import "./styles.css";
-import { OauthSuccessPage } from "../oauth/success/OauthSuccessPage";
 
 const Login = () => {
     const [loginForm, setLoginForm] = useState({})
-    const [decodedToken, setDecodedToken] = useState(null)
     const { login } = useContext(AuthContext);
 
     const [error, setError] = useState(null);
@@ -45,11 +42,6 @@ const Login = () => {
             setError("Errore di connessione");
         }
     };
-
-
-    const handleRedirectToGoogle = () => {
-        window.location.href = `${process.env.REACT_APP_SERVER_BASE_URL}/auth/google`
-    }
 
     return (
         <Container className="login-container pt-5 mt-5">
