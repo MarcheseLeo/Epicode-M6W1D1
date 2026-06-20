@@ -18,7 +18,15 @@ const authRoute = require('./modules/auth/auth.route')
 const googleOauthRoute = require('./modules/oauth/oauth.route')
 
 const server = express()
-server.use(cors())
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:3000',
+    'http://localhost:3001',
+].filter(Boolean)
+
+server.use(cors({
+    origin: allowedOrigins
+}))
 server.use(express.json())
 server.use('/upload', express.static(path.join(__dirname, './upload')))
 
